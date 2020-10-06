@@ -48,19 +48,19 @@ proc univariate data = public.COMPRESSOR_ISEFF_Train;
 var Isentropic_Efficiency
 	_61PIT120_Suction_Pressure _61TIT121_SuctionTemperature 
 	_61PIT222_DischargePressure _61TIT221_DischargeTemperature
-	_61FIT101_VolumetricFlowrate _61FIT120_VolumetricFlowrate;
+	_61FIT101_VolumetricFlowrate ;
 run;
 /*****************************************************************************/
 *Creating Model Specifications Using PROC SMSPEC;
 /*****************************************************************************/
 /*A - With log Transform*/;
 proc smspec;
-target transform = log;
+target transform = logm;
 input        _61PIT120_Suction_Pressure _61TIT121_SuctionTemperature 
 			_61PIT222_DischargePressure _61TIT221_DischargeTemperature
-			_61FIT101_VolumetricFlowrate _61FIT120_VolumetricFlowrate / transform = log;
-	reg name=public.reg_log alpha=0.10 holdout=100;
-	arima name=public.arima_log alpha=0.10 holdout=100; 
+			_61FIT101_VolumetricFlowrate  / transform = logm;
+	reg name=public.reg_log alpha=0.10 holdout=200;
+	arima name=public.arima_log alpha=0.10 holdout=200; 
 run;
 
 /*B - With/out Log Transform*/;
@@ -68,9 +68,9 @@ proc smspec;
 /* target transform = log; */
 input       _61PIT120_Suction_Pressure _61TIT121_SuctionTemperature 
 			_61PIT222_DischargePressure _61TIT221_DischargeTemperature
-			_61FIT101_VolumetricFlowrate _61FIT120_VolumetricFlowrate ;
-	reg name=public.reg_ alpha=0.10 holdout=100;
-	arima name=public.arima_ alpha=0.10 holdout=100; 
+			_61FIT101_VolumetricFlowrate  ;
+	reg name=public.reg_ alpha=0.10 holdout=200;
+	arima name=public.arima_ alpha=0.10 holdout=200; 
 run;
 
 /*****************************************************************************/
@@ -81,7 +81,7 @@ run;
 data public.project_1 (Keep = Date_Time stable Isentropic_Efficiency
 						_61PIT120_Suction_Pressure _61TIT121_SuctionTemperature 
 						_61PIT222_DischargePressure _61TIT221_DischargeTemperature
-						_61FIT101_VolumetricFlowrate _61FIT120_VolumetricFlowrate);
+						_61FIT101_VolumetricFlowrate );
 set  public.COMPRESSOR_ISEFF_Train;
 	stable=1;
 run;
@@ -90,9 +90,9 @@ data public.project_1_score (Keep =
 						 Date_Time  Isentropic_Efficiency
 						_61PIT120_Suction_Pressure _61TIT121_SuctionTemperature 
 						_61PIT222_DischargePressure _61TIT221_DischargeTemperature
-						_61FIT101_VolumetricFlowrate _61FIT120_VolumetricFlowrate);
+						_61FIT101_VolumetricFlowrate );
 set public.COMPRESSOR_ISEFF ;
-    WHERE Date_Time BETWEEN '01Jul2020:00:00:25'dt and '10Jul2020:23:50:25'dt ; /*1440 Obs*/
+    WHERE Date_Time BETWEEN '16Jul2020:00:00:25'dt and '27Jul2020:23:50:25'dt ; /*1440 Obs*/
 run;
 
 proc smproject name=public.proj1
@@ -105,7 +105,7 @@ target Isentropic_Efficiency;
 input   
 		_61PIT120_Suction_Pressure _61TIT121_SuctionTemperature 
 	    _61PIT222_DischargePressure _61TIT221_DischargeTemperature
-	    _61FIT101_VolumetricFlowrate _61FIT120_VolumetricFlowrate;
+	    _61FIT101_VolumetricFlowrate ;
 	stable stable;
     datetime Date_Time;
 model REG_ ARIMA_ REG_LOG ARIMA_LOG / force nowarn;
